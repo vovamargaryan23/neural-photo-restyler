@@ -1,45 +1,21 @@
-from typing import Tuple, Union
-
-import os
-import math
-
 import numpy as np
 from PIL import Image
-from torch import Tensor
-from torchvision import transforms
+from config import DEVICE
 
 
-_to_tensor = transforms.ToTensor()
-_to_pil = transforms.ToPILImage() 
-
-
-def _ensure_rgb(img: Image.Image) -> Image.Image:
-    if img.mode != "RGB":
-        return img.convert("RGB")
-    return img
-
-
-def read_image(path: str) -> Image.Image:
-    if not os.path.isfile(path):
-        raise FileNotFoundError(f"Image not found: {path}")
-    img = Image.open(path)
-    return _ensure_rgb(img)
-
-
-def save_image(image: Image.Image, path: str) -> bool:
-    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    ext = os.path.splitext(path)[1].lower()
-    if ext in [".png"]:
-        image.save(path, format="PNG")
-    else:
-        image.save(path, format="JPEG")
+def load_image(image_path, transform=None, max_size=None, shape=None):
+    """Load an image and convert it to a torch tensor."""
+    image = Image.open(image_path)
     
-
-def pil_to_tensor(image: Image.Image) -> Tensor:
-    t = _to_tensor(image)
-    return t
+    if max_size:
+        scale = max_size / max(image.size)
+        size = np.array(image.size) * scale
+        image = image.resize(size.astype(int), Image.Resampling.LANCZOS)
     
-
-def tensor_to_pil(tensor: Tensor) -> Image.Image:
-    i = _to_pil(tensor)
-    return i
+    if shape:
+        image = image.resize(shape, Image.Resampling.LANCZOS)
+    
+    if transform:
+        image = transform(image).unsqueeze(0)
+    
+    return image.to(DEVICE)

@@ -4,4 +4,4 @@ from torch import cuda
 APPLICATION_NAME = "Neural-Photo-Restyler"
 APPLICATION_DESCRIPTION = "image transformation pipeline that applies neural style transfer to photos of any kind portraits, landscapes, objects, etc. "
 
-DEVICE = ("gpu" if cuda.is_available() else "cpu")
+DEVICE = ("cuda" if cuda.is_available() else "cpu")
